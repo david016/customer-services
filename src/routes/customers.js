@@ -4,7 +4,7 @@ import customerController from "../controllers/customerController.js";
 const router = express.Router();
 
 router
-  .route("")
+  .route("/")
   .get(customerController.getCustomers)
   .post(customerController.createCustomer);
 

@@ -1,25 +1,25 @@
 import customerModel from "../models/customerModel.js";
 
-async function getCustomers(req, res) {
+async function getCustomers(req, res, next) {
   try {
     const customers = await customerModel.getCustomers();
     res.json(customers);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
-async function getCustomerById(req, res) {
+async function getCustomerById(req, res, next) {
   try {
     const id = req.params.id;
     const customer = await customerModel.getCustomerById(id);
     res.json(customer);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
-async function createCustomer(req, res) {
+async function createCustomer(req, res, next) {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -32,7 +32,7 @@ async function createCustomer(req, res) {
     const result = await customerModel.createCustomer(name, email, password);
     res.status(201).json({ id: result.insertId, name, email });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
