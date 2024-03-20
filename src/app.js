@@ -7,6 +7,7 @@ import authRouter from "./routes/auth.js";
 
 import errorHandler from "./middlewares/errorHandler.js";
 import logger from "./middlewares/loggers.js";
+import verifyJwt from "./middlewares/verifyJwt.js";
 
 const app = express();
 
@@ -14,10 +15,11 @@ app.use(express.json());
 // middleware for logging
 app.use(logger.expressWinstonLogger);
 
+app.use("/auth", authRouter);
+app.use(verifyJwt);
 app.use("/customers", customerRouter);
 app.use("/users", userRouter);
 app.use("/services", serviceRouter);
-app.use("/auth", authRouter);
 
 app.all("*", (req, res, next) => {
   const err = new Error(`Can't find ${req.originalUrl} on this server!`);
