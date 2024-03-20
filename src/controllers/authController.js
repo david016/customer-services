@@ -53,7 +53,6 @@ async function login(req, res, next) {
     return res.status(401).json({ message: "Invalid credentials" });
   }
 
-  // TODO: Generate and return JWT
   const accessToken = jwt.sign(
     { username: user.username, email: user.email },
     process.env.ACCESS_TOKEN_SECRET,
@@ -74,9 +73,9 @@ async function login(req, res, next) {
     sameSite: "none",
     secure: true,
   });
-
+  // save refreshToken in DB
+  userModel.editUser({ ...user, refreshToken });
   res.json({ accessToken });
-  // res.json({ message: "Logged in" });
 }
 
 export default {
