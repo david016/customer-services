@@ -11,7 +11,4 @@ router
 
 router.route("/:id").get(serviceController.getServiceById);
 
-// router.route("/:id").get(customerController.getCustomerById);
-// router.route("/:id/services").get(customerController.getCustomerServices);
-
 export default router;

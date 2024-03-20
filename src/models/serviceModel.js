@@ -47,26 +47,8 @@ async function createService(name, description, price) {
   }
 }
 
-// async function getServicesByCustomerId(customerId) {
-//   try {
-//     const [rows] = await pool.query(
-//       `
-//       SELECT * FROM services as s
-//       JOIN customers_services as cs ON s.id = cs.service_id
-//       WHERE cs.customer_id = ?
-//       `,
-//       [customerId]
-//     );
-//     return rows;
-//   } catch (error) {
-//     console.error("Error retrieving services by customer id:", error);
-//     throw error;
-//   }
-// }
-
 export default {
   getServices,
   getServiceById,
   createService,
-  //   getServicesByCustomerId,
 };

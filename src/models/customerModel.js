@@ -32,7 +32,6 @@ async function getCustomerById(id) {
     );
     const services = await getCustomerServices(id);
     return { ...customer[0], services };
-    // return;
   } catch (error) {
     console.error(`Error retrieving customer with id ${id}:`, error);
     throw error;
