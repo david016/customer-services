@@ -20,6 +20,7 @@ async function getCustomerById(req, res, next) {
 }
 
 async function createCustomer(req, res, next) {
+  console.log(req.body);
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -36,4 +37,42 @@ async function createCustomer(req, res, next) {
   }
 }
 
-export default { getCustomers, getCustomerById, createCustomer };
+async function getCustomerServices(req, res, next) {
+  try {
+    const id = req.params.id;
+    const customer = await customerModel.getCustomerById(id);
+    res.json(customer.services);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function editCustomer(req, res, next) {
+  try {
+    const id = req.params.id;
+    const { name, email, password } = req.body;
+    const result = await customerModel.editCustomer(id, name, email, password);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function deleteCustomer(req, res, next) {
+  try {
+    const id = req.params.id;
+    await customerModel.deleteCustomer(id);
+    res.status(204).end();
+  } catch (error) {
+    next(error);
+  }
+}
+
+export default {
+  getCustomers,
+  getCustomerById,
+  createCustomer,
+  editCustomer,
+  deleteCustomer,
+  getCustomerServices,
+};

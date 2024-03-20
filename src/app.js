@@ -1,5 +1,9 @@
 import express from "express";
+
 import customerRouter from "./routes/customers.js";
+import serviceRouter from "./routes/services.js";
+import authRouter from "./routes/auth.js";
+
 import errorHandler from "./middlewares/errorHandler.js";
 import logger from "./middlewares/loggers.js";
 
@@ -10,6 +14,8 @@ app.use(express.json());
 app.use(logger.expressWinstonLogger);
 
 app.use("/customers", customerRouter);
+app.use("/services", serviceRouter);
+app.use("/auth", authRouter);
 
 app.all("*", (req, res, next) => {
   const err = new Error(`Can't find ${req.originalUrl} on this server!`);
