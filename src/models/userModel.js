@@ -57,12 +57,23 @@ async function createUser(username, email, password, customerId) {
   }
 }
 
-async function editUser(id, username, email, password) {
+async function editUser(user) {
   try {
-    const [result] = await pool.query(
-      "UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?",
-      [username, email, password, id]
-    );
+    let query = "UPDATE users SET ";
+    let values = [];
+
+    for (let key in user) {
+      if (user.hasOwnProperty(key) && key !== "id") {
+        query += `${key} = ?, `;
+        values.push(user[key]);
+      }
+    }
+
+    query = query.slice(0, -2); // Remove the last comma and space
+    query += " WHERE id = ?";
+    values.push(user.id);
+
+    const [result] = await pool.query(query, values);
     return result;
   } catch (error) {
     console.error("Error editing user:", error);

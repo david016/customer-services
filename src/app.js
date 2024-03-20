@@ -1,6 +1,7 @@
 import express from "express";
 
 import customerRouter from "./routes/customers.js";
+import userRouter from "./routes/users.js";
 import serviceRouter from "./routes/services.js";
 import authRouter from "./routes/auth.js";
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use(logger.expressWinstonLogger);
 
 app.use("/customers", customerRouter);
+app.use("/users", userRouter);
 app.use("/services", serviceRouter);
 app.use("/auth", authRouter);
 

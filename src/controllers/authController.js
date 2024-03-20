@@ -1,5 +1,10 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
 import userModel from "../models/userModel.js";
+
+dotenv.config();
 
 async function register(req, res, next) {
   const { username, email, password, customerId, isAdmin = false } = req.body;
@@ -49,7 +54,28 @@ async function login(req, res, next) {
   }
 
   // TODO: Generate and return JWT
-  res.json({ message: "Logged in" });
+  const accessToken = jwt.sign(
+    { username: user.username, email: user.email },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: "30s",
+    }
+  );
+  const refreshToken = jwt.sign(
+    { username: user.username, email: user.email },
+    process.env.REFRESH_TOKEN_SECRET,
+    {
+      expiresIn: "1d",
+    }
+  );
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    sameSite: "none",
+    secure: true,
+  });
+
+  res.json({ accessToken });
+  // res.json({ message: "Logged in" });
 }
 
 export default {

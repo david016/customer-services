@@ -44,8 +44,8 @@ async function createUser(req, res, next) {
 async function editUser(req, res, next) {
   try {
     const id = req.params.id;
-    const { username, email, password } = req.body;
-    const result = await userModel.editUser(id, username, email, password);
+    const user = { id, ...req.body };
+    const result = await userModel.editUser(user);
     res.json(result);
   } catch (error) {
     next(error);

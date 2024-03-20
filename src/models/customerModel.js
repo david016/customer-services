@@ -51,13 +51,24 @@ async function createCustomer(name, email, password) {
   }
 }
 
-async function editCustomer(id, name, email, password) {
+async function editCustomer(customer) {
   try {
-    const [result] = await pool.query(
-      "UPDATE customers SET name = ?, email = ?, password = ? WHERE id = ?",
-      [name, email, password, id]
-    );
-    return { id, name, email };
+    let query = "UPDATE customers SET ";
+    let values = [];
+
+    for (let key in customer) {
+      if (customer.hasOwnProperty(key) && key !== "id") {
+        query += `${key} = ?, `;
+        values.push(customer[key]);
+      }
+    }
+
+    query = query.slice(0, -2); // Remove the last comma and space
+    query += " WHERE id = ?";
+    values.push(customer.id);
+
+    const [result] = await pool.query(query, values);
+    return { id: customer.id, name: customer.name, email: customer.email };
   } catch (error) {
     console.error("Error editing customer:", error);
     throw error;
