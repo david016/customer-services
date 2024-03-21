@@ -15,14 +15,14 @@ async function register(req, res, next) {
     });
   }
 
-  const duplicitCustomer = await userModel.getUserByEmail(email);
-  if (duplicitCustomer) {
-    return res.status(409).json({
-      message: "Customer is already registered",
-    });
-  }
-
   try {
+    const duplicitCustomer = await userModel.getUserByEmail(email);
+    if (duplicitCustomer) {
+      return res.status(409).json({
+        message: "Customer is already registered",
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = await userModel.createUser(
       username,
@@ -37,52 +37,60 @@ async function register(req, res, next) {
 }
 
 async function login(req, res, next) {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  const user = await validateCredentials(email, password, userModel, res);
-  if (res.headersSent) return; // If a response has been sent, stop execution
+    const user = await validateCredentials(email, password, userModel, res);
+    if (res.headersSent) return; // If a response has been sent, stop execution
 
-  const accessToken = jwt.sign(
-    { username: user.username, email: user.email },
-    process.env.ACCESS_TOKEN_SECRET,
-    {
-      expiresIn: "15s",
-    }
-  );
-  const refreshToken = jwt.sign(
-    { username: user.username, email: user.email },
-    process.env.REFRESH_TOKEN_SECRET,
-    {
-      expiresIn: "1d",
-    }
-  );
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    MaxAge: 1000 * 60 * 60 * 24,
-    sameSite: "none",
-    secure: true,
-  });
+    const accessToken = jwt.sign(
+      { username: user.username, email: user.email },
+      process.env.ACCESS_TOKEN_SECRET,
+      {
+        expiresIn: "15s",
+      }
+    );
+    const refreshToken = jwt.sign(
+      { username: user.username, email: user.email },
+      process.env.REFRESH_TOKEN_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      MaxAge: 1000 * 60 * 60 * 24,
+      sameSite: "none",
+      secure: true,
+    });
 
-  userModel.editUser({ ...user, refreshToken });
-  res.json({ accessToken });
+    userModel.editUser({ ...user, refreshToken });
+    res.json({ accessToken });
+  } catch (error) {
+    next(error);
+  }
 }
 
 async function logout(req, res, next) {
-  const refreshToken = req.cookies.refreshToken;
-  if (!refreshToken) {
-    return res.status(204).json({ message: "Refresh token not found" });
-  }
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(204).json({ message: "Refresh token not found" });
+    }
 
-  const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-  const user = await userModel.getUserByEmail(decoded.email);
-  if (!user || user.refreshToken !== refreshToken) {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const user = await userModel.getUserByEmail(decoded.email);
+    if (!user || user.refreshToken !== refreshToken) {
+      clearRefreshTokenCookie(res);
+      return res.status(204).json({ message: "Invalid refresh token" });
+    }
+
+    userModel.editUser({ ...user, refreshToken: null });
     clearRefreshTokenCookie(res);
-    return res.status(204).json({ message: "Invalid refresh token" });
+    res.status(204).json({ message: "Logged out successfully" });
+  } catch (error) {
+    next(error);
   }
-
-  userModel.editUser({ ...user, refreshToken: null });
-  clearRefreshTokenCookie(res);
-  res.status(204);
 }
 
 function clearRefreshTokenCookie(res) {
