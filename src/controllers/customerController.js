@@ -50,8 +50,6 @@ async function getCustomerServices(req, res, next) {
 async function editCustomer(req, res, next) {
   try {
     const id = req.params.id;
-    // const { name, email, password } = req.body;
-    // const result = await customerModel.editCustomer(id, name, email, password);
     const customer = { id, ...req.body };
     const result = await customerModel.editCustomer(customer);
     res.json(result);

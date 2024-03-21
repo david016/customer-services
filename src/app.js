@@ -1,9 +1,11 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 
 import customerRouter from "./routes/customers.js";
 import userRouter from "./routes/users.js";
 import serviceRouter from "./routes/services.js";
 import authRouter from "./routes/auth.js";
+import refreshTokenRouter from "./routes/refreshToken.js";
 
 import errorHandler from "./middlewares/errorHandler.js";
 import logger from "./middlewares/loggers.js";
@@ -12,10 +14,13 @@ import verifyJwt from "./middlewares/verifyJwt.js";
 const app = express();
 
 app.use(express.json());
+// middleware for parsing cookies
+app.use(cookieParser());
 // middleware for logging
 app.use(logger.expressWinstonLogger);
 
 app.use("/auth", authRouter);
+app.use("/refreshToken", refreshTokenRouter);
 app.use(verifyJwt);
 app.use("/customers", customerRouter);
 app.use("/users", userRouter);
