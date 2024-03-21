@@ -73,12 +73,40 @@ async function login(req, res, next) {
     sameSite: "none",
     secure: true,
   });
-  // save refreshToken in DB
+
   userModel.editUser({ ...user, refreshToken });
   res.json({ accessToken });
+}
+
+async function logout(req, res, next) {
+  const refreshToken = req.cookies.refreshToken;
+  if (!refreshToken) {
+    return res.status(204).json({ message: "Refresh token not found" });
+  }
+
+  const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+  const user = await userModel.getUserByEmail(decoded.email);
+  if (!user || user.refreshToken !== refreshToken) {
+    clearRefreshTokenCookie(res);
+    return res.status(204).json({ message: "Invalid refresh token" });
+  }
+
+  userModel.editUser({ ...user, refreshToken: null });
+  clearRefreshTokenCookie(res);
+  res.status(204);
+}
+
+function clearRefreshTokenCookie(res) {
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    MaxAge: 1000 * 60 * 60 * 24,
+    sameSite: "none",
+    secure: true,
+  });
 }
 
 export default {
   register,
   login,
+  logout,
 };
