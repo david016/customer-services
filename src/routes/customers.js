@@ -1,6 +1,7 @@
 import express from "express";
 
 import customerController from "../controllers/customerController.js";
+import verifyAdmin from "../middlewares/verifyAdmin.js";
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ router
 router
   .route("/:id")
   .get(customerController.getCustomerById)
-  .delete(customerController.deleteCustomer)
+  .delete(verifyAdmin, customerController.deleteCustomer)
   .put(customerController.editCustomer);
 router.route("/:id/services").get(customerController.getCustomerServices);
 
